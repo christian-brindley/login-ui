@@ -1,22 +1,26 @@
+import { useState } from "react";
+
 export default function LoginPassword({ step, onNext }) {
   const passwordCallback = step.getCallbackOfType("PasswordCallback");
-
   const actionCallback = step.getCallbackOfType("ChoiceCallback");
 
-  function callbackHandler(action) {
-    passwordCallback.setPassword(
-      document.querySelector('input[name="password"]')?.value || "."
-    );
+  const [password, setPassword] = useState("");
+
+  function handleSubmit(e, action = "SUBMIT") {
+    e.preventDefault();
+
+    passwordCallback.setPassword(password || ".");
     actionCallback.setChoiceValue(action);
     onNext();
   }
 
   return (
-    <div>
+    <form onSubmit={(e) => handleSubmit(e, "SUBMIT")}>
       <div className="panel-header">
         <div className="panel-title">{step.getHeader()}</div>
         <div className="panel-description">{step.getDescription()}</div>
       </div>
+
       <div className="input-with-action">
         <input
           className="form-control"
@@ -24,25 +28,30 @@ export default function LoginPassword({ step, onNext }) {
           name="password"
           placeholder={passwordCallback.getPrompt()}
           autoFocus
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
         />
+
         <button
-          type="button"
+          type="submit"
           className="input-action-button"
-          onClick={() => callbackHandler("SUBMIT")}
           aria-label="Next"
+          disabled={!password}
         >
           &gt;
         </button>
       </div>
+
       <div className="panel-link-row">
         <button
           type="button"
           className="button-link"
-          onClick={() => callbackHandler("EMAIL_OTP")}
+          onClick={(e) => handleSubmit(e, "EMAIL_OTP")}
         >
           Email me a code instead
         </button>
       </div>
-    </div>
+    </form>
   );
 }

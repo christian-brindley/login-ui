@@ -1,41 +1,49 @@
+import { useState } from "react";
+
 export default function LoginEmail({ step, onNext }) {
   const emailCallback = step.getCallbackOfType("StringAttributeInputCallback");
+  const [email, setEmail] = useState("");
 
-  function callbackHandler() {
-    emailCallback.setValue(
-      document.querySelector('input[name="email"]')?.value || ""
-    );
+  function handleSubmit(e) {
+    e.preventDefault(); // prevent page reload
+    emailCallback.setValue(email);
     onNext();
   }
 
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <div className="panel-header">
         <div className="panel-title">{step.getHeader()}</div>
         <div className="panel-description">{step.getDescription()}</div>
       </div>
+
       <div className="input-with-action">
         <input
           className="form-control"
-          type="text"
+          type="email"
           name="email"
           placeholder={emailCallback.getPrompt()}
           autoFocus
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
         />
+
         <button
-          type="button"
+          type="submit"
           className="input-action-button"
-          onClick={callbackHandler}
           aria-label="Next"
+          disabled={!email.trim()}
         >
           &gt;
         </button>
       </div>
+
       <div className="panel-link-row">
-        <button type="button" className="button-link" onClick={callbackHandler}>
+        <button type="button" className="button-link" onClick={handleSubmit}>
           Not registered?
         </button>
       </div>
-    </div>
+    </form>
   );
 }

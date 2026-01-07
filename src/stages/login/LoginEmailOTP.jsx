@@ -1,44 +1,56 @@
-import { useRef } from "react";
+import { useState, useRef } from "react";
 
 export default function LoginEmailOTP({ step, onNext }) {
   const otpCallback = step.getCallbackOfType("StringAttributeInputCallback");
   const actionCallback = step.getCallbackOfType("ChoiceCallback");
 
+  const [otp, setOtp] = useState(Array(6).fill(""));
   const inputsRef = useRef([]);
 
-  function callbackHandler(action) {
-    const otp = inputsRef.current.map((i) => i.value).join("") || ".";
-    otpCallback.setValue(otp);
+  function submit(action = "SUBMIT") {
+    const value = otp.join("") || ".";
+    otpCallback.setValue(value);
     actionCallback.setChoiceValue(action);
     onNext();
   }
 
-  // function submitOtp() {
-  //   const otp = inputsRef.current.map((i) => i.value).join("");
-  //   if (otp.length !== 6) return;
-
-  //   passwordCallback.setPassword(otp);
-  //   actionCallback.setChoiceValue("SUBMIT");
-  //   onNext();
-  // }
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (otp.join("").length === 6) {
+      submit("SUBMIT");
+    }
+  }
 
   function handleChange(e, index) {
-    const value = e.target.value.replace(/\D/g, ""); // numbers only
-    e.target.value = value;
+    const value = e.target.value.replace(/\D/g, "");
+    if (!value) return;
 
-    if (value && index < 5) {
-      inputsRef.current[index + 1].focus();
+    const next = [...otp];
+    next[index] = value[0];
+    setOtp(next);
+
+    if (index < 5) {
+      inputsRef.current[index + 1]?.focus();
     }
 
-    const otp = inputsRef.current.map((i) => i.value).join("");
-    if (otp.length === 6) {
-      callbackHandler("SUBMIT");
+    if (next.join("").length === 6) {
+      submit("SUBMIT");
     }
   }
 
   function handleKeyDown(e, index) {
-    if (e.key === "Backspace" && !e.target.value && index > 0) {
-      inputsRef.current[index - 1].focus();
+    if (e.key === "Backspace") {
+      e.preventDefault();
+
+      const next = [...otp];
+      if (next[index]) {
+        next[index] = "";
+        setOtp(next);
+      } else if (index > 0) {
+        inputsRef.current[index - 1]?.focus();
+        next[index - 1] = "";
+        setOtp(next);
+      }
     }
   }
 
@@ -47,33 +59,33 @@ export default function LoginEmailOTP({ step, onNext }) {
       .getData("Text")
       .replace(/\D/g, "")
       .slice(0, 6);
+
     if (!paste) return;
 
+    const next = Array(6).fill("");
     paste.split("").forEach((char, i) => {
-      if (inputsRef.current[i]) {
-        inputsRef.current[i].value = char;
-      }
+      next[i] = char;
     });
 
-    // Focus last input and submit if 6 digits
-    const lastIndex = Math.min(paste.length - 1, 5);
-    inputsRef.current[lastIndex].focus();
+    setOtp(next);
+    inputsRef.current[Math.min(paste.length, 6) - 1]?.focus();
 
     if (paste.length === 6) {
-      callbackHandler("SUBMIT");
+      submit("SUBMIT");
     }
 
-    e.preventDefault(); // prevent default paste behavior
+    e.preventDefault();
   }
 
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <div className="panel-header">
         <div className="panel-title">{step.getHeader()}</div>
         <div className="panel-description">{step.getDescription()}</div>
       </div>
+
       <div className="field-row otp-row">
-        {[...Array(6)].map((_, i) => (
+        {otp.map((value, i) => (
           <input
             key={i}
             ref={(el) => (inputsRef.current[i] = el)}
@@ -82,21 +94,25 @@ export default function LoginEmailOTP({ step, onNext }) {
             inputMode="numeric"
             maxLength={1}
             autoFocus={i === 0}
+            value={value}
             onChange={(e) => handleChange(e, i)}
             onKeyDown={(e) => handleKeyDown(e, i)}
-            onPaste={handlePaste} // <-- added paste support
+            onPaste={handlePaste}
+            aria-label={`OTP digit ${i + 1}`}
+            required
           />
         ))}
       </div>
+
       <div className="panel-link-row">
         <button
           type="button"
           className="button-link"
-          onClick={() => callbackHandler("RESEND")}
+          onClick={() => submit("RESEND")}
         >
           Resend Email
         </button>
       </div>
-    </div>
+    </form>
   );
 }

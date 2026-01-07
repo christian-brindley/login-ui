@@ -20,7 +20,7 @@ code {
   height: 100vh;
 
 }
-.panel > div {
+.panel > form {
   display: flex;
   flex-direction: column;
   row-gap: 5px; /* space between input and button row */
@@ -45,7 +45,7 @@ code {
 .button-link {
   background: none;           /* remove button background */
   border: none;               /* remove button border */
-  color: #0357b0;             /* blue link color */
+  color: rgb(0,0,86);             /* blue link color */
   font-weight: normal;
   font-size: small;
   text-decoration: none;      /* no underline by default */
@@ -81,7 +81,7 @@ code {
 }
 
 .form-control {
-  border: 2px solid #007bff; /* blue border */
+  border: 2px solid rgb(0,0,86); /* blue border */
   border-radius: 8px;
   font-size: small;
   outline: none; /* remove default focus outline */
