@@ -8,22 +8,32 @@ import LoginEmailOTP from "./stages/login/LoginEmailOTP";
 const StageHandlers = { LoginEmail, LoginPassword, LoginEmailOTP };
 const FATAL = "Fatal";
 
-const wellknownUrl =
-  "https://openam-brindley.forgeblocks.com/am/oauth2/realms/root/realms/alpha/.well-known/openid-configuration";
+const DEFAULT_WELLKNOWN =
+  "https://openam-demo.forgeblocks.com/am/oauth2/realms/root/realms/alpha/.well-known/openid-configuration";
 
 export default function App() {
   const [activeStageName, setActiveStageName] = useState(null);
-  const [step, setStep] = useState(null); // ForgeRock step object
+  const [step, setStep] = useState(null);
 
+  const [showSettings, setShowSettings] = useState(false);
+  const [wellknownUrl, setWellknownUrl] = useState(
+    () => localStorage.getItem("wellknownUrl") || DEFAULT_WELLKNOWN
+  );
+
+  // Initialize ForgeRock whenever well-known URL changes
   useEffect(() => {
     async function initConfigAndStart() {
-      await Config.setAsync({
-        serverConfig: { wellknown: wellknownUrl },
-      });
-      startJourney();
+      try {
+        await Config.setAsync({
+          serverConfig: { wellknown: wellknownUrl },
+        });
+        startJourney();
+      } catch (err) {
+        handleFatalError(err);
+      }
     }
     initConfigAndStart();
-  }, []);
+  }, [wellknownUrl]);
 
   async function startJourney() {
     try {
@@ -53,10 +63,46 @@ export default function App() {
     setActiveStageName(FATAL);
   }
 
+  function saveSettings() {
+    localStorage.setItem("wellknownUrl", wellknownUrl);
+    setShowSettings(false);
+  }
+
   const ActiveStage = StageHandlers[activeStageName];
 
   return (
     <div className="App">
+      {/* Settings icon */}
+      <button
+        className="settings-button"
+        aria-label="Settings"
+        onClick={() => setShowSettings(true)}
+      >
+        settings
+      </button>
+
+      {/* Settings dialog */}
+      {showSettings && (
+        <div className="settings-backdrop">
+          <div className="settings-dialog">
+            <h3>Settings</h3>
+            <label>
+              Well-Known URL
+              <input
+                type="text"
+                value={wellknownUrl}
+                onChange={(e) => setWellknownUrl(e.target.value)}
+              />
+            </label>
+
+            <div className="settings-actions">
+              <button onClick={() => setShowSettings(false)}>Cancel</button>
+              <button onClick={saveSettings}>Save & Restart</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="panel">
         {ActiveStage ? (
           <ActiveStage step={step} onNext={handleNext} />
