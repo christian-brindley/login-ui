@@ -1,0 +1,164 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #dbe1ea;
+
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.panel {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+
+}
+.panel > div {
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px; /* space between input and button row */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-radius: 5px;
+  padding: 20px;
+  background: #b4c4e3;
+  max-width: 200px;
+  min-width: 200px;
+}
+
+.panel .panel-button-row {
+  display: flex;
+   flex-direction: column;
+}
+
+.panel-link-row {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.button-link {
+  background: none;           /* remove button background */
+  border: none;               /* remove button border */
+  color: #0357b0;             /* blue link color */
+  font-weight: normal;
+  font-size: small;
+  text-decoration: none;      /* no underline by default */
+  cursor: pointer;
+  padding: 0;                 /* remove extra spacing */
+  font-family: inherit;       /* match surrounding text */
+  transition: text-decoration 0.2s ease, color 0.2s ease;
+}
+
+.button-link:hover {
+  text-decoration: underline; /* underline on hover */
+  color: #0056b3;             /* darker blue on hover */
+}
+
+.panel-header {
+  margin-bottom: 10px;
+  
+}
+
+.panel-title {
+  font-size: large;
+  font-weight: bold;
+  margin-bottom: 5px;
+    color: rgb(0,0,86);
+
+}
+
+.panel-description {
+  font-size: small;
+  white-space: normal;
+  overflow-wrap: break-word;
+       color: rgb(0,0,86);
+}
+
+.form-control {
+  border: 2px solid #007bff; /* blue border */
+  border-radius: 8px;
+  font-size: small;
+  outline: none; /* remove default focus outline */
+  padding: 3px
+}
+
+.form-control:focus {
+  border-color: #0056b3; /* darker blue when focused */
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2); /* optional glow */
+}
+
+.form-control::placeholder {
+  color: gray; /* light blue placeholder */
+  opacity: 1;     /* ensures consistent opacity across browsers */
+}
+
+.btn-primary {
+  background-color: #026ad8; /* main blue */
+  border: 2px solid #026ad8; /* matches background */
+  color: #ffffff; /* text color */
+  border-radius: 3px;
+  padding: 3px;
+  font-size: small;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3; /* darker blue on hover */
+  border-color: #0056b3;
+}
+
+.btn-primary:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3); /* subtle glow */
+}
+
+.field-row {
+  display: flex;
+  gap: 5px; /* space between fields */
+  width: 100%;
+}
+
+.field-row .form-control {
+  flex: 1; /* equal width */
+  min-width: 0;
+  text-align: center;
+}
+
+.input-with-action {
+  display: flex;
+  align-items: stretch;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+}
+
+.input-with-action .form-control {
+  border: none;
+  background: white;
+  flex: 1;
+  padding: 5px;
+}
+
+.input-action-button {
+  background-color: #007bff;
+  border: none;
+  color: white;
+  font-weight: bold;
+  width: 30px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.otp-row {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
