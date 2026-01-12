@@ -2,6 +2,9 @@ import { useState } from "react";
 
 export default function LoginPassword({ step, onNext }) {
   const passwordCallback = step.getCallbackOfType("PasswordCallback");
+  const stageMetadata = step
+    .getCallbackOfType("MetadataCallback")
+    .getOutputByName("data");
   const actionCallback = step.getCallbackOfType("ChoiceCallback");
 
   const [password, setPassword] = useState("");
@@ -42,6 +45,7 @@ export default function LoginPassword({ step, onNext }) {
           &gt;
         </button>
       </div>
+      <div className="input-error-message">{stageMetadata.errorMessage}</div>
 
       <div className="panel-link-row">
         <button

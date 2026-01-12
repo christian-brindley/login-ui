@@ -2,6 +2,10 @@ import { useState } from "react";
 
 export default function LoginEmail({ step, onNext }) {
   const emailCallback = step.getCallbackOfType("StringAttributeInputCallback");
+  const stageMetadata = step
+    .getCallbackOfType("MetadataCallback")
+    .getOutputByName("data");
+
   const [email, setEmail] = useState("");
 
   function handleSubmit(e) {
@@ -16,7 +20,6 @@ export default function LoginEmail({ step, onNext }) {
         <div className="panel-title">{step.getHeader()}</div>
         <div className="panel-description">{step.getDescription()}</div>
       </div>
-
       <div className="input-with-action">
         <input
           className="form-control"
@@ -38,7 +41,7 @@ export default function LoginEmail({ step, onNext }) {
           &gt;
         </button>
       </div>
-
+      <div className="input-error-message">{stageMetadata.errorMessage}</div>
       <div className="panel-link-row">
         <button type="button" className="button-link" onClick={handleSubmit}>
           Not registered?
