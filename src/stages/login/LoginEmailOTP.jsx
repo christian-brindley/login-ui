@@ -5,13 +5,26 @@ export default function LoginEmailOTP({ step, onNext }) {
   const actionCallback = step.getCallbackOfType("ChoiceCallback");
 
   const [otp, setOtp] = useState(Array(6).fill(""));
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const inputsRef = useRef([]);
 
   function submit(action = "SUBMIT") {
     const value = otp.join("") || ".";
     otpCallback.setValue(value);
     actionCallback.setChoiceValue(action);
-    onNext();
+
+    if (action === "SUBMIT") {
+      setIsSubmitting(true);
+
+      setTimeout(() => {
+        setIsSubmitting(false);
+        onNext();
+      }, 500);
+
+      return; // ⬅️ block immediate onNext
+    }
+
+    onNext(); // non-SUBMIT actions continue immediately
   }
 
   function handleSubmit(e) {
@@ -45,12 +58,11 @@ export default function LoginEmailOTP({ step, onNext }) {
       const next = [...otp];
       if (next[index]) {
         next[index] = "";
-        setOtp(next);
       } else if (index > 0) {
         inputsRef.current[index - 1]?.focus();
         next[index - 1] = "";
-        setOtp(next);
       }
+      setOtp(next);
     }
   }
 
@@ -103,7 +115,12 @@ export default function LoginEmailOTP({ step, onNext }) {
           />
         ))}
       </div>
-
+      <div
+        className={`otp-spinner ${isSubmitting ? "visible" : ""}`}
+        aria-hidden={!isSubmitting}
+      >
+        <div className="spinner" />
+      </div>
       <div className="panel-link-row">
         <button
           type="button"
