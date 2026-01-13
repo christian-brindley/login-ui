@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { Config, FRAuth } from "@forgerock/javascript-sdk";
 
 import LoginEmail from "./stages/login/LoginEmail";
@@ -9,7 +10,7 @@ const StageHandlers = { LoginEmail, LoginPassword, LoginEmailOTP };
 const FATAL = "Fatal";
 
 const DEFAULT_WELLKNOWN =
-  "https://openam-demo.forgeblocks.com/am/oauth2/realms/root/realms/alpha/.well-known/openid-configuration";
+  "https://openam-brindley.forgeblocks.com/am/oauth2/realms/root/realms/alpha/.well-known/openid-configuration";
 
 export default function App() {
   const [activeStageName, setActiveStageName] = useState(null);
@@ -20,12 +21,38 @@ export default function App() {
     () => localStorage.getItem("wellknownUrl") || DEFAULT_WELLKNOWN
   );
 
+  const url = new URL(document.location);
+  const urlParams = url.searchParams;
+
+  function getRootTransactionId() {
+    return uuidv4();
+  }
+
+  const rootTransactionId = getRootTransactionId();
+  let authRequestNumber = 0;
+
   // Initialize ForgeRock whenever well-known URL changes
   useEffect(() => {
     async function initConfigAndStart() {
       try {
         await Config.setAsync({
           serverConfig: { wellknown: wellknownUrl },
+          middleware: [
+            (req, action, next) => {
+              if (req.init.headers) {
+                // increment the request number
+                authRequestNumber++;
+                console.log("req", JSON.stringify(req));
+                // Set a transaction ID that should identify this request of this auth session of this tree in logs
+
+                req.init.headers.append(
+                  "x-forgerock-transactionid",
+                  `${rootTransactionId}-request-${authRequestNumber}`
+                );
+                req.url.search = urlParams;
+              }
+            },
+          ],
         });
         startJourney();
       } catch (err) {
@@ -46,6 +73,14 @@ export default function App() {
 
   function handleStep(nextStep) {
     setStep(nextStep);
+    if (nextStep.type === "LoginSuccess") {
+      const successUrl = nextStep.payload.successUrl;
+      //alert(successUrl);
+      window.location.replace(successUrl);
+      setActiveStageName("LoginSuccess");
+      return;
+    }
+
     setActiveStageName(nextStep.getStage());
   }
 

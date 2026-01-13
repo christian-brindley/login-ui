@@ -1,15 +1,29 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function LoginEmailOTP({ step, onNext }) {
   const otpCallback = step.getCallbackOfType("StringAttributeInputCallback");
   const actionCallback = step.getCallbackOfType("ChoiceCallback");
+  const stageMetadata = step
+    .getCallbackOfType("MetadataCallback")
+    .getOutputByName("data");
 
   const [otp, setOtp] = useState(Array(6).fill(""));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputsRef = useRef([]);
 
-  function submit(action = "SUBMIT") {
-    const value = otp.join("") || ".";
+  // ✅ Reset OTP and focus first digit on load / step change
+  useEffect(() => {
+    const emptyOtp = Array(6).fill("");
+    setOtp(emptyOtp);
+    otpCallback.setValue("."); // ForgeRock-safe empty value
+
+    requestAnimationFrame(() => {
+      inputsRef.current[0]?.focus();
+    });
+  }, [step, otpCallback]);
+
+  function submit(action = "SUBMIT", otpValue) {
+    const value = otpValue || otp.join("") || ".";
     otpCallback.setValue(value);
     actionCallback.setChoiceValue(action);
 
@@ -21,16 +35,16 @@ export default function LoginEmailOTP({ step, onNext }) {
         onNext();
       }, 500);
 
-      return; // ⬅️ block immediate onNext
+      return;
     }
 
-    onNext(); // non-SUBMIT actions continue immediately
+    onNext();
   }
 
   function handleSubmit(e) {
     e.preventDefault();
     if (otp.join("").length === 6) {
-      submit("SUBMIT");
+      submit("SUBMIT", otp.join(""));
     }
   }
 
@@ -46,8 +60,9 @@ export default function LoginEmailOTP({ step, onNext }) {
       inputsRef.current[index + 1]?.focus();
     }
 
+    // ✅ Submit using computed value (not stale state)
     if (next.join("").length === 6) {
-      submit("SUBMIT");
+      submit("SUBMIT", next.join(""));
     }
   }
 
@@ -83,7 +98,7 @@ export default function LoginEmailOTP({ step, onNext }) {
     inputsRef.current[Math.min(paste.length, 6) - 1]?.focus();
 
     if (paste.length === 6) {
-      submit("SUBMIT");
+      submit("SUBMIT", next.join(""));
     }
 
     e.preventDefault();
@@ -105,22 +120,26 @@ export default function LoginEmailOTP({ step, onNext }) {
             type="text"
             inputMode="numeric"
             maxLength={1}
-            autoFocus={i === 0}
             value={value}
             onChange={(e) => handleChange(e, i)}
             onKeyDown={(e) => handleKeyDown(e, i)}
             onPaste={handlePaste}
             aria-label={`OTP digit ${i + 1}`}
+            autoComplete="one-time-code"
             required
           />
         ))}
       </div>
+
+      <div className="input-error-message">{stageMetadata.errorMessage}</div>
+
       <div
         className={`otp-spinner ${isSubmitting ? "visible" : ""}`}
         aria-hidden={!isSubmitting}
       >
         <div className="spinner" />
       </div>
+
       <div className="panel-link-row">
         <button
           type="button"
